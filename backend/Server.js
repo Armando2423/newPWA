@@ -9,7 +9,7 @@ const User = require('./models/Users');
 /* const TempID = require('./models/TempID'); */
 
 const app = express();
-const PORT = process.env.PORT;
+const PORT = process.env.PORT || 3008;
 
 app.use(cors({ origin: '*' }));
 app.use(express.json());
@@ -90,8 +90,8 @@ app.get('/users', async (req, res) => {
     console.error('❌ Error al obtener usuarios:', error);
     res.status(500).json({ message: 'Error en el servidor' });
   }
-});
+}); 
 
 app.listen(PORT, () => {
-  console.log(`🚀 Servidor corriendo en: http://192.168.100.16:${PORT}`);
+  console.log(`🚀 Servidor corriendo en el puerto ${PORT}`);
 });
