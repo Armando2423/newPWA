@@ -1,6 +1,6 @@
 const APP_SHELL_CACHE = 'appShell-v1';
 const DYNAMIC_CACHE = 'dinamico-v1';
-const API_URL = 'http://localhost:3005/register';
+const API_URL = 'http://192.168.0.215:3005/register';
 
 const APP_SHELL_FILES = [
     '/',
@@ -11,6 +11,9 @@ const APP_SHELL_FILES = [
     '/src/App.css',
     '/src/components/login/Login.jsx',
     '/src/components/signup/Signup.jsx',
+    '/src/components/splashScreen/SplashScreen.jsx',
+    '/src/components/users/Users.jsx',
+    '/src/components/main/Main.jsx'
 ];
 
 self.addEventListener('install', event => {
@@ -52,24 +55,45 @@ self.addEventListener('activate', event => {
       );
   }
 }); */
+function openDatabase() {
+    return new Promise((resolve, reject) => {
+        let request = indexedDB.open("database", 1);
+
+        request.onupgradeneeded = function (event) {
+            let db = event.target.result;
+            if (!db.objectStoreNames.contains("usuarios")) {
+                let store = db.createObjectStore("usuarios", { keyPath: "email" });
+                store.createIndex("email", "email", { unique: true });
+            }
+        };
+
+        request.onsuccess = function (event) {
+            resolve(event.target.result);
+        };
+
+        request.onerror = function (event) {
+            reject("Error al abrir IndexedDB: " + event.target.error);
+        };
+    });
+}
+
+
 
 self.addEventListener('fetch', event => {
-  if (event.request.method === "POST" && event.request.url.includes("/register")) {
-      event.respondWith(
-          event.request.clone().json().then(data => {
-              insertIndexedDB(data); // Guardar en IndexedDB
-              self.registration.sync.register("sync-usuarios"); // Programar sincronización
+    if (event.request.method === "POST" && event.request.url.includes("/signup")) {
+        event.respondWith(
+            event.request.clone().json().then(data => {
+                insertIndexedDB(data);
+                self.registration.sync.register("sync-usuarios");
 
-              return fetch(event.request.clone()) // Hacer la petición al backend
-                  .then(response => response.clone()) 
-                  .catch(() => {
-                      return new Response(JSON.stringify({ message: "Guardado localmente, se sincronizará cuando haya internet" }), {
-                          headers: { "Content-Type": "application/json" }
-                      });
-                  });
-          }).catch(error => console.error("Error al procesar request JSON:", error))
-      );
-  }
+                return fetch(event.request.clone()).catch(() => {
+                    return new Response(JSON.stringify({ message: "Guardado localmente, se sincronizará cuando haya internet" }), {
+                        headers: { "Content-Type": "application/json" }
+                    });
+                });
+            }).catch(error => console.error("Error al procesar request JSON:", error))
+        );
+    }
 });
 
 
@@ -91,72 +115,53 @@ self.addEventListener('fetch', event => {
 }
  */
 
-function insertIndexedDB(data) {
-  console.log("Guardando en IndexedDB:", data);
-  let request = indexedDB.open("database", 1);
+async function insertIndexedDB(data) {
+    let db = await openDatabase();
+    let transaction = db.transaction("usuarios", "readwrite");
+    let store = transaction.objectStore("usuarios");
 
-  request.onsuccess = function (event) {
-      let db = event.target.result;
-      let transaction = db.transaction("usuarios", "readwrite");
-      let store = transaction.objectStore("usuarios");
-
-      let addRequest = store.add(data);
-      addRequest.onsuccess = () => console.log("Usuario guardado correctamente:", data);
-      addRequest.onerror = err => {
-          if (err.target.error.name === "ConstraintError") {
-              console.warn("El usuario ya existe en IndexedDB, actualizando...");
-
-              let updateTransaction = db.transaction("usuarios", "readwrite");
-              let updateStore = updateTransaction.objectStore("usuarios");
-              updateStore.put(data); // Si ya existe, lo actualiza en lugar de fallar
-          } else {
-              console.error("Error al guardar usuario:", err);
-          }
-      };
-  };
-
-  request.onerror = function (event) {
-      console.error("Error al abrir IndexedDB:", event.target.error);
-  };
+    try {
+        await store.add(data);
+        console.log("Usuario guardado correctamente:", data);
+    } catch (err) {
+        if (err.name === "ConstraintError") {
+            console.warn("El usuario ya existe en IndexedDB, actualizando...");
+            await store.put(data);
+        } else {
+            console.error("Error al guardar usuario:", err);
+        }
+    }
 }
-
 
 async function syncUsuarios() {
-  console.log("Intentando sincronizar usuarios...");
-  let dbRequest = indexedDB.open("database");
+    console.log("Intentando sincronizar usuarios...");
+    let db = await openDatabase();
+    let transaction = db.transaction("usuarios", "readonly");
+    let store = transaction.objectStore("usuarios");
 
-  dbRequest.onsuccess = async function (event) {
-      let db = event.target.result;
-      let transaction = db.transaction("usuarios", "readonly");
-      let store = transaction.objectStore("usuarios");
+    let usuarios = await store.getAll();
+    console.log("Usuarios pendientes de sincronizar:", usuarios);
 
-      let getAllRequest = store.getAll();
-      getAllRequest.onsuccess = async function () {
-          let usuarios = getAllRequest.result;
-          console.log("Usuarios pendientes de sincronizar:", usuarios);
+    for (let usuario of usuarios) {
+        try {
+            let response = await fetch(API_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(usuario),
+            });
 
-          for (let usuario of usuarios) {
-              try {
-                  let response = await fetch(API_URL, {
-                      method: 'POST',
-                      headers: { 'Content-Type': 'application/json' },
-                      body: JSON.stringify(usuario),
-                  });
-
-                  if (response.ok) {
-                      console.log('Usuario sincronizado:', usuario);
-
-                      let deleteTransaction = db.transaction("usuarios", "readwrite");
-                      let deleteStore = deleteTransaction.objectStore("usuarios");
-                      deleteStore.delete(usuario.email);
-                  }
-              } catch (error) {
-                  console.error('Error al sincronizar usuario', usuario, error);
-              }
-          }
-      };
-  };
+            if (response.ok) {
+                console.log('Usuario sincronizado:', usuario);
+                let deleteTransaction = db.transaction("usuarios", "readwrite");
+                let deleteStore = deleteTransaction.objectStore("usuarios");
+                deleteStore.delete(usuario.email);
+            }
+        } catch (error) {
+            console.error('Error al sincronizar usuario', usuario, error);
+        }
+    }
 }
+
 
 
 // Sincronización en segundo plano
@@ -168,15 +173,20 @@ self.addEventListener('sync', event => {
 
 
 // Notificaciones Push
-self.addEventListener('push', event => {
-    const options = {
-        body: "Tienes una nueva notificación",
-        icon: "/src/imgs/snake1.jpg",
-        image: "/src/imgs/snake1.jpg",
-        vibrate: [200, 100, 200]
-    };
-    self.registration.showNotification("Nueva Notificación", options);
+self.addEventListener('message', (event) => {
+    if (event.data.action === 'sendNotification') {
+        const { title, body } = event.data;
+        const options = {
+            body: body,
+            icon: "/src/imgs/fire.png",
+            image: "/src/imgs/fire.png",
+            vibrate: [200, 100, 200]
+        };
+
+        self.registration.showNotification(title, options);
+    }
 });
+
 
 // Manejo de clic en notificaciones
 self.addEventListener('notificationclick', event => {
