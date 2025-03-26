@@ -10,7 +10,7 @@ const Users = () => {
     useEffect(() => {
         const fetchUsers = async () => {
             try {
-                const response = await fetch("http://192.168.100.16:3005/users");
+                const response = await fetch("http://192.168.100.16:3008/users");
                 const data = await response.json();
                 setUsers(data);
             } catch (error) {

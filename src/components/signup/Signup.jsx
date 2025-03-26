@@ -30,7 +30,7 @@ const SignUp = () => {
         }
 
         try {
-            const response = await axios.post('http://192.168.100.16:3005/register', {
+            const response = await axios.post('http://192.168.100.16:3008/register', {
                 name: formData.name,
                 app: formData.app,
                 apm: formData.apm,

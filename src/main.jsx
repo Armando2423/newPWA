@@ -35,7 +35,7 @@ navigator.serviceWorker.register('../sw.js', { type: 'module' })
                     .then(subscription => {
                         console.log(subscription);
                         // Guardar la suscripción en el servidor
-                        return fetch('http://192.168.100.16:3005/save-subscription', {
+                        return fetch('http://localhost:3005/save-subscription', {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify(subscription)

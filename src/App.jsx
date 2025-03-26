@@ -8,15 +8,21 @@ import Users from "./components/users/Users";
 
 const App = () => {
   const [showSplash, setShowSplash] = useState(true);
-  const isAuthenticated = false;
-
-  const PrivateRoute = ({ element, ...rest }) => {
-    if (!isAuthenticated) {
-      alert('Inicia sesión', 'Para ingresar debes iniciar sesión');
-    }
+ 
+  const [isAuthenticated, setIsAuthenticated] = useState(
+    localStorage.getItem("isAuthenticated") === "true"
+  );
   
+  // Función para manejar la autenticación
+  const handleLoginSuccess = () => {
+    localStorage.setItem("isAuthenticated", "true");
+    setIsAuthenticated(true);
+  };
+  
+  const PrivateRoute = ({ element }) => {
     return isAuthenticated ? element : <Navigate to="/" replace />;
   };
+  
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -34,11 +40,11 @@ const App = () => {
         <SplashScreen />
       ) : (
         <Routes>
-          <Route path="/" element={<Login />} />
+          <Route path="/" element={<Login onLoginSuccess={handleLoginSuccess} />} />
           <Route path="/signup" element={<SignUp />} />
          {/*  <Route path="/users" element={<Users />} />
           <Route path="/main" element={<Main />} /> */}
-          <Route path="/users" element={<PrivateRoute element={<Users />} />} />
+        <Route path="/users" element={<PrivateRoute element={<Users />} />} />
           <Route path="/main" element={<PrivateRoute element={<Main />} />} /> 
         </Routes>
       )}
