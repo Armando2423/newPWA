@@ -7,9 +7,9 @@ export default defineConfig({
   server: {
     port:  3005, // Usa el puerto de Render o el 3005 localmente
     host: true, // Permite acceder desde cualquier IP
-    headers: {
+   /*  headers: {
       "Content-Security-Policy": "default-src 'self'; img-src * data:; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline';"
-    }
+    } */
   },
   preview: {
     port: process.env.PORT || 3000,

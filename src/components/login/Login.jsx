@@ -18,11 +18,13 @@ const Login = ({ onLoginSuccess }) => {
             const response = await axios.post('http://192.168.100.16:3008/login', { email, password });
 
             if (response.data.rol) {
+                alert('Haz iniciado sesión, exitosamente',);
                 localStorage.setItem("isAuthenticated", "true");
                 onLoginSuccess(); // ✅ Actualiza `isAuthenticated` en App.js
                 navigate(response.data.rol.toLowerCase() === "admin" ? '/users' : '/main');
             }
         } catch (err) {
+            alert('ERROR, Vuelve a iniciar sesión');
             setError(err.response?.data?.message || 'Error al iniciar sesión');
         }
     };

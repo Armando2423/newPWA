@@ -1,7 +1,7 @@
 {
     "name": "pwa2",
     "short_name": "pw",
-    "start_url": "index.html",
+    "start_url": "/",
     "display": "standalone",
     "background_color": "#ffffff",
     "theme_color": "#ff2d00",

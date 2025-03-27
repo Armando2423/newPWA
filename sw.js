@@ -1,6 +1,6 @@
 const APP_SHELL_CACHE = 'appShell-v1';
 const DYNAMIC_CACHE = 'dinamico-v1';
-const API_URL = 'http://192.168.0.215:3005/register';
+const API_URL = 'http://localhost:3008/register';
 
 const APP_SHELL_FILES = [
     '/',
