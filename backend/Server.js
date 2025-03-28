@@ -11,7 +11,7 @@ const Suscription = require('./models/Subscription');
 
 const app = express();
 const IP = process.env.IP;
-const PORT = process.env.PORT || 3008;
+const PORT = process.env.PORT || 3000;
 
 app.use(cors({ origin: '*' }));
 app.use(express.json());

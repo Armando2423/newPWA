@@ -88,7 +88,7 @@ const SignUp = () => {
 
         if (navigator.onLine) {
             try {
-                const response = await axios.post('http://localhost:3008/register', {
+                const response = await axios.post('http://localhost:3000/register', {
                     name: formData.name,
                     app: formData.app,
                     apm: formData.apm,

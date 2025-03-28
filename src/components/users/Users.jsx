@@ -24,7 +24,7 @@ const Users = () => {
                     .then(subscription => {
                         console.log(subscription);
                         // Guardar la suscripción en el servidor
-                        return fetch('http://localhost:3008/save-subscription', {
+                        return fetch('http://localhost:3000/save-subscription', {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify(subscription)

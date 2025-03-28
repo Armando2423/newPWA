@@ -15,7 +15,7 @@ const Login = ({ onLoginSuccess }) => {
         setError('');
 
         try {
-            const response = await axios.post('http://192.168.100.16:3008/login', { email, password });
+            const response = await axios.post('http://192.168.100.16:3000/login', { email, password });
 
             if (response.data.rol) {
                 alert('Haz iniciado sesión, exitosamente',);
