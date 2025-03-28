@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from "react";
 import "./Users.css";
 
-import sw from "../../../sw";
-
+/* import sw from "../../../sw";
+ */
 const Users = () => {
     const [users, setUsers] = useState([]);
     const [modalOpen, setModalOpen] = useState(false);
     const [selectedUser, setSelectedUser] = useState(null);
 
-    navigator.serviceWorker.register('../sw.js', { type: 'module' })
+    navigator.serviceWorker.register('../../../sw.js', { type: 'module' })
     .then(registro => {
         console.log("Service Worker registrado");
 
