@@ -10,7 +10,7 @@ const Suscription = require('./models/Subscription');
 /* const TempID = require('./models/TempID'); */
 
 const app = express();
-const IP = process.env.IP;
+const IP = '0.0.0.0';
 const PORT = process.env.PORT || 3000;
 
 app.use(cors({ origin: '*' }));
