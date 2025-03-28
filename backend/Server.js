@@ -107,5 +107,5 @@ app.post('/save-subscription', async (req, res) => {
 });
 
 app.listen(PORT, IP, () => {
-  console.log(`🚀 Servidor corriendo http://${IP}:${PORT}`);
-});
+  console.log(`🚀 Servidor corriendo en http://${IP}:${PORT}`);
+}); 
