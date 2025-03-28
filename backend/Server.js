@@ -6,10 +6,11 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 
 const User = require('./models/Users');
+const Suscription = require('./models/Subscription');
 /* const TempID = require('./models/TempID'); */
 
 const app = express();
-const IP = process.env.IP || '0.0.0.0';
+const IP = process.env.IP;
 const PORT = process.env.PORT || 3008;
 
 app.use(cors({ origin: '*' }));
@@ -92,6 +93,18 @@ app.get('/users', async (req, res) => {
     res.status(500).json({ message: 'Error en el servidor' });
   }
 }); 
+
+// Ruta para guardar la suscripción en la base de datos
+app.post('/save-subscription', async (req, res) => {
+  try {
+    const subscription = req.body.subscription;
+    const newSubscription = new Subscription(subscription);
+    await newSubscription.save();
+    res.status(201).json({ message: 'Suscripción guardada' });
+  } catch (error) {
+    res.status(500).json({ error: 'Error al guardar la suscripción', details: error });
+  }
+});
 
 app.listen(PORT, IP, () => {
   console.log(`🚀 Servidor corriendo http://${IP}:${PORT}`);

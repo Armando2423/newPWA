@@ -14,7 +14,7 @@ const SplashScreen = () => {
   return (
     <div className={`splash-container ${fadeOut ? "fade-out" : ""}`}>
       <img src={logo} alt="Logo" className="splash-logo" />
-      <h1 className="splash-text">WElCOME to my PWA 🚀</h1>
+      <h1 className="splash-text">WELCOME to my PWA 🚀</h1>
     </div>
   );
 };

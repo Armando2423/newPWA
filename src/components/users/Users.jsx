@@ -1,16 +1,51 @@
 import React, { useState, useEffect } from "react";
 import "./Users.css";
 
+import sw from "../../../sw";
+
 const Users = () => {
     const [users, setUsers] = useState([]);
     const [modalOpen, setModalOpen] = useState(false);
     const [selectedUser, setSelectedUser] = useState(null);
 
+    navigator.serviceWorker.register('../sw.js', { type: 'module' })
+    .then(registro => {
+        console.log("Service Worker registrado");
+
+        // Verificar permisos de notificaciones
+        if (Notification.permission === 'denied' || Notification.permission === 'default') {
+            Notification.requestPermission().then(permission => {
+                if (permission === 'granted') {
+                    // Suscribirse a notificaciones push
+                    registro.pushManager.subscribe({
+                        userVisibleOnly: true,
+                        applicationServerKey: keys.public_key
+                    })
+                    .then(subscription => {
+                        console.log(subscription);
+                        // Guardar la suscripción en el servidor
+                        return fetch('http://localhost:3008/save-subscription', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(subscription)
+                        });
+                    })
+                    .then(response => response.json())
+                    .then(data => console.log('Suscripción guardada:', data))
+                    .catch(error => console.error('Error al guardar la suscripción:', error));
+                }
+            });
+        }
+    })
+    .catch(error => {
+        console.error("Error al registrar el Service Worker:", error);
+    });
+
     // 🚀 Obtener usuarios desde la API
     useEffect(() => {
         const fetchUsers = async () => {
             try {
-                const response = await fetch("http://192.168.100.16:3008/users");
+                const response = await fetch("http://localhost:3008/users");
                 const data = await response.json();
                 setUsers(data);
             } catch (error) {
